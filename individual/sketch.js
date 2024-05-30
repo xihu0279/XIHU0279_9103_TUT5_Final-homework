@@ -532,8 +532,16 @@ function drawGlassCover() {
   stroke(200); // 灰色边框
   strokeWeight(2); // 边框宽度
   ellipse(clockX, clockY, clockSize * 1.3, clockSize * 1.3); // 绘制玻璃盖子
+
+  // 新增代码：绘制金色圆
+  stroke(255, 165, 0); // 设置画笔颜色为金色
+  strokeWeight(1); // 线条宽度
+  noFill(); // 不填充
+  ellipse(clockX, clockY, clockSize * 1.25, clockSize * 1.25); // 绘制离玻璃边框有一点距离的金色圆
+
   pop();
 }
+
 
 // 新增代码：绘制橙色渐变小圆
 function drawGradientCircles() {
@@ -545,4 +553,6 @@ function drawGradientCircles() {
     ellipse(x, y, 10, 10); // 小圆的直径
     circle.angle += gradientSpeed; // 更新角度，使小圆顺时针运动
   });
+ 
+  
 }
