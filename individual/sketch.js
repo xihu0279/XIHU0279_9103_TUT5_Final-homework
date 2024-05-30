@@ -2,7 +2,6 @@ let clockX, clockY, clockSize;  // 定义时钟中心坐标和大小
 let colors = [];                // 主时钟颜色数组
 let altColors = [];             // 交替圆环颜色数组
 let balls = [];                 // 存储圆球的数组，包括角度和速度
-
 let circles = [];
 let circleDiameter = 130; // 主圆的直径，可以调整
 let spacing = 25; // 圆圈之间的间距，可以调整
@@ -18,6 +17,9 @@ let goldLineSpikes = 16; // 金线的角的个数，默认16
 
 let rotationAngle = 0;  // 用于控制旋转角度
 let rotationSpeed = 0.05;  // 控制旋转速度
+
+let gradientCircles = [];
+let gradientSpeed = 0.02;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -76,6 +78,31 @@ function setup() {
     circles[selectedIndices[i]].isSpecial = true;
   }
 
+  // 初始化橙色渐变小圆
+  let gradientColors = [
+    color(255, 140, 0),
+    color(255, 165, 0),
+    color(255, 175, 0),
+    color(255, 190, 0),
+    color(255, 200, 0),
+    color(255, 210, 0),
+    color(255, 220, 0),
+    color(255, 230, 0),
+    color(255, 240, 0),
+    color(255, 250, 0)
+  ];
+
+  let gradientRadius = (clockSize * 0.95 + clockSize * circleGroupDistanceFactor) / 4;
+  let gradientAngleStep = TWO_PI / gradientColors.length;
+
+  for (let i = 0; i < gradientColors.length; i++) {
+    gradientCircles.push({
+      color: gradientColors[i],
+      angle: i * gradientAngleStep,
+      radius: gradientRadius,
+    });
+  }
+
   loop();  // 启用持续更新
 }
 
@@ -89,6 +116,7 @@ function drawClock() {
   drawMainCircles();
   drawMovingBalls();
   drawRandomColoredCircles();
+  drawGradientCircles(); // 新增：绘制渐变小圆
   drawClockHands();  // 新增：绘制时钟指针
   drawGlassCover();  // 新增：绘制玻璃盖子
 }
@@ -505,4 +533,16 @@ function drawGlassCover() {
   strokeWeight(2); // 边框宽度
   ellipse(clockX, clockY, clockSize * 1.3, clockSize * 1.3); // 绘制玻璃盖子
   pop();
+}
+
+// 新增代码：绘制橙色渐变小圆
+function drawGradientCircles() {
+  gradientCircles.forEach(circle => {
+    let x = clockX + cos(circle.angle) * circle.radius;
+    let y = clockY + sin(circle.angle) * circle.radius;
+    fill(circle.color);
+    noStroke();
+    ellipse(x, y, 10, 10); // 小圆的直径
+    circle.angle += gradientSpeed; // 更新角度，使小圆顺时针运动
+  });
 }
