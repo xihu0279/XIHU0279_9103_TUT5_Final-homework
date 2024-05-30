@@ -90,6 +90,7 @@ function drawClock() {
   drawMovingBalls();
   drawRandomColoredCircles();
   drawClockHands();  // 新增：绘制时钟指针
+  drawGlassCover();  // 新增：绘制玻璃盖子
 }
 
 function drawMainCircles() {
@@ -474,9 +475,9 @@ function drawClockHands() {
   let minutes = now.getMinutes();
   let hours = now.getHours() % 12;
 
-  drawHand(clockX, clockY, clockSize * 0.63, seconds / 60 * TWO_PI - HALF_PI, color(255), 2); // 秒针
-  drawHandWithBall(clockX, clockY, clockSize * 0.42, minutes / 60 * TWO_PI - HALF_PI, color(0, 255, 255), 4, 5); // 分针
-  drawHandWithBall(clockX, clockY, clockSize * 0.21, hours / 12 * TWO_PI - HALF_PI, color(0, 0, 255), 6, 3); // 时针
+  drawHand(clockX, clockY, clockSize * 0.63, seconds / 60 * TWO_PI - HALF_PI, color(255), 4); // 秒针
+  drawHandWithBall(clockX, clockY, clockSize * 0.42, minutes / 60 * TWO_PI - HALF_PI, color(0, 255, 255), 8, 16); // 分针
+  drawHandWithBall(clockX, clockY, clockSize * 0.21, hours / 12 * TWO_PI - HALF_PI, color(0, 0, 255), 12, 24); // 时针
 }
 
 function drawHand(cx, cy, length, angle, col, weight) {
@@ -485,7 +486,7 @@ function drawHand(cx, cy, length, angle, col, weight) {
   line(cx, cy, cx + cos(angle) * length, cy + sin(angle) * length);
 }
 
-function drawHandWithBall(cx, cy, length, angle, col, weight, ballSizeMultiplier) {
+function drawHandWithBall(cx, cy, length, angle, col, weight, ballSize) {
   stroke(col);
   strokeWeight(weight);
   line(cx, cy, cx + cos(angle) * length, cy + sin(angle) * length);
@@ -493,6 +494,15 @@ function drawHandWithBall(cx, cy, length, angle, col, weight, ballSizeMultiplier
   // 在指针尾部绘制小圆球
   fill(col);
   noStroke();
-  let ballSize = weight * ballSizeMultiplier; // 调整球的大小
-  ellipse(cx + cos(angle) * length, cy + sin(angle) * length, ballSize, ballSize); // 调整球的位置
+  ellipse(cx + cos(angle) * length, cy + sin(angle) * length, ballSize, ballSize); // 调整球的位置和大小
+}
+
+// 新增代码：绘制玻璃盖子
+function drawGlassCover() {
+  push();
+  fill(255, 255, 255, 10); // 半透明白色，透明度为50
+  stroke(200); // 灰色边框
+  strokeWeight(2); // 边框宽度
+  ellipse(clockX, clockY, clockSize * 1.3, clockSize * 1.3); // 绘制玻璃盖子
+  pop();
 }
