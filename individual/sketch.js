@@ -1,64 +1,64 @@
-let clockX, clockY, clockSize;  // 定义时钟中心坐标和大小
-let colors = [];                // 主时钟颜色数组
-let altColors = [];             // 交替圆环颜色数组
-let balls = [];                 // 存储圆球的数组，包括角度和速度
+let clockX, clockY, clockSize;  // Define clock center coordinates and size
+let colors = [];                // Array for main clock colors
+let altColors = [];             // Array for alternating ring colors
+let balls = [];                 // Array for storing ball properties (angle and speed)
 
 let circles = [];
-let circleDiameter = 130; // 主圆的直径，可以调整
-let spacing = 25; // 圆圈之间的间距，可以调整
-let offsetX = -20; // 所有圆向左移动的偏移量，可以调整
-let offsetY = -30; // 所有圆向上移动的偏移量，可以调整
-let circleGroupDistanceFactor = 0.65; // 同心圆组离最大的圆的距离因子
+let circleDiameter = 130; // Diameter of the main circle, adjustable
+let spacing = 25; // Spacing between circles, adjustable
+let offsetX = -20; // Offset to move all circles left, adjustable
+let offsetY = -30; // Offset to move all circles up, adjustable
+let circleGroupDistanceFactor = 0.65; // Distance factor for concentric circle groups
 
-let specialCircleColor = [255, 255, 0]; // 特殊圆的颜色，默认黄色
-let redLineStrokeWeight = 0.8; // 红线的宽度，默认3
-let redLineSpikes = 130; // 红线的角的个数，默认16
-let goldLineStrokeWeight = 3; // 金线的宽度，默认3
-let goldLineSpikes = 16; // 金线的角的个数，默认16
+let specialCircleColor = [255, 255, 0]; // Special circle color, default is yellow
+let redLineStrokeWeight = 0.8; // Width of the red line
+let redLineSpikes = 130; // Number of spikes on the red line
+let goldLineStrokeWeight = 3; // Width of the gold line
+let goldLineSpikes = 16; // Number of spikes on the gold line
 
-let rotationAngle = 0;  // 用于控制旋转角度
-let rotationSpeed = 0.05;  // 控制旋转速度
+let rotationAngle = 0;  // Angle for rotation control
+let rotationSpeed = 0.05;  // Speed for rotation control
 
-// 新增代码：初始化变量
+// Initialize variables
 let gradientCircles = [];
 let gradientSpeed = 0.02;
 
 let coloredCircles = [];
-let coloredRadius = []; // 初始化彩色小圆的半径，可以修改以调整位置
-let coloredSpeed = 0.01;  // 定义彩色小圆的旋转速度
+let coloredRadius = []; // Initialize radius for colored circles, adjustable
+let coloredSpeed = 0.01;  // Speed for colored circle rotation
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  clockSize = min(windowWidth, windowHeight) * 0.7;  // 计算时钟大小
-  clockX = windowWidth / 2;                          // 设置时钟中心X坐标
-  clockY = windowHeight / 2;                         // 设置时钟中心Y坐标
-  
-  // 初始化主时钟的颜色
+  clockSize = min(windowWidth, windowHeight) * 0.7;  // Calculate clock size
+  clockX = windowWidth / 2;  // Set clock center X coordinate
+  clockY = windowHeight / 2; // Set clock center Y coordinate
+
+  // Initialize main clock colors
   for (let i = 0; i < 24; i++) {
     colors.push([random(255), random(255), random(255)]);
   }
 
-  // 初始化交替圆环的颜色
+  // Initialize alternating ring colors
   for (let i = 0; i < 48; i++) {
     altColors.push([random(255), random(255), random(255)]);
   }
 
-  // 初始化小圆球的位置和速度
+  // Initialize ball positions and speeds
   balls = [
-    {radius: clockSize * 0.63 / 2, speed: 0.05, angle: 0},  // 对应第三圈
-    {radius: clockSize * 0.49 / 2, speed: 0.1, angle: 0},  // 对应第五圈
-    {radius: clockSize * 0.35 / 2, speed: 0.15, angle: 0}   // 对应第七圈
+    {radius: clockSize * 0.63 / 2, speed: 0.05, angle: 0},  // Third ring
+    {radius: clockSize * 0.49 / 2, speed: 0.1, angle: 0},   // Fifth ring
+    {radius: clockSize * 0.35 / 2, speed: 0.15, angle: 0}   // Seventh ring
   ];
 
-  // 初始化外围一圈的圆信息，并加入到circles数组中
+  // Initialize outer circle information and add to circles array
   let angleStep = TWO_PI / 12;
   for (let i = 0; i < 12; i++) {
     let angle = i * angleStep;
     let x = clockX + cos(angle) * clockSize * circleGroupDistanceFactor;
     let y = clockY + sin(angle) * clockSize * circleGroupDistanceFactor;
-    let angleStart = random(TWO_PI);  // 随机起始角度
-    let hasArc = random() > 0.5;  // 50% 的几率决定是否有弧线
-    let styleType = random(['goldZigzag', 'multiLayeredRings']); // 随机选择风格
+    let angleStart = random(TWO_PI);  // Random start angle
+    let hasArc = random() > 0.5;  // 50% chance to have an arc
+    let styleType = random(['goldZigzag', 'multiLayeredRings']); // Random style choice
     circles.push({
       x: x,
       y: y,
@@ -66,11 +66,11 @@ function setup() {
       colors: generateColors(),
       startAngle: angleStart,
       hasArc: hasArc,
-      styleType: styleType  // 存储风格类型
+      styleType: styleType  // Store style type
     });
   }
 
-  // 随机选择两个同心圆组
+  // Randomly select two special concentric circles
   let selectedIndices = [];
   while (selectedIndices.length < 2) {
     let index = floor(random(circles.length));
@@ -79,12 +79,12 @@ function setup() {
     }
   }
 
-  // 更新这两个同心圆的属性
+  // Update properties of the two special concentric circles
   for (let i = 0; i < selectedIndices.length; i++) {
     circles[selectedIndices[i]].isSpecial = true;
   }
 
-  // 初始化橙色渐变小圆
+  // Initialize orange gradient circles
   let gradientColors = [
     color(255, 140, 0),
     color(255, 165, 0),
@@ -98,7 +98,7 @@ function setup() {
     color(255, 250, 0)
   ];
 
-  let gradientRadius = (clockSize * 0.16 + clockSize * circleGroupDistanceFactor) / 2; // 调整半径，使小圆往外移动一点
+  let gradientRadius = (clockSize * 0.16 + clockSize * circleGroupDistanceFactor) / 2; // Adjust radius to move circles outward slightly
   let gradientAngleStep = TWO_PI / gradientColors.length;
 
   for (let i = 0; i < gradientColors.length; i++) {
@@ -108,17 +108,19 @@ function setup() {
       radius: gradientRadius,
     });
   }
-// 计算彩色小圆的半径，使其在最大深蓝色圆的外围一点点
-coloredRadius = clockSize * 0.84 / 2 + 25;  // 比最大的深蓝色圆外半径大15
-  // 新增代码：初始化7个彩色小圆
+
+  // Calculate the radius for the colored circles to be just outside the largest dark blue circle
+  coloredRadius = clockSize * 0.84 / 2 + 25;  // 25 units larger than the outer radius of the largest dark blue circle
+
+  // Initialize 7 colored circles
   let coloredCircleColors = [
-    color(255, 0, 0), // 红色
-    color(255, 165, 0), // 橙色
-    color(255, 255, 0), // 黄色
-    color(0, 255, 0), // 绿色
-    color(0, 255, 255), // 青色
-    color(0, 0, 255), // 蓝色
-    color(128, 0, 128) // 紫色
+    color(255, 0, 0), // Red
+    color(255, 165, 0), // Orange
+    color(255, 255, 0), // Yellow
+    color(0, 255, 0), // Green
+    color(0, 255, 255), // Cyan
+    color(0, 0, 255), // Blue
+    color(128, 0, 128) // Purple
   ];
   let coloredAngleStep = TWO_PI / coloredCircleColors.length;
 
@@ -130,67 +132,67 @@ coloredRadius = clockSize * 0.84 / 2 + 25;  // 比最大的深蓝色圆外半径
     });
   }
 
-  loop();  // 启用持续更新
+  loop();  // Enable continuous updating
 }
 
 function draw() {
   drawClock();
-  rotationAngle += rotationSpeed; // 更新旋转角度
+  rotationAngle += rotationSpeed; // Update rotation angle
 }
 
 function drawClock() {
-  background(255);  // 设置背景颜色为白色
+  background(255);  // Set background color to white
   drawMainCircles();
   drawMovingBalls();
   drawRandomColoredCircles();
-  drawGradientCircles(); // 新增：绘制渐变小圆
-  drawColoredCircles(); // 新增：绘制彩色小圆
-  drawClockHands();  // 新增：绘制时钟指针
-  drawGlassCover();  // 新增：绘制玻璃盖子
+  drawGradientCircles(); // Draw gradient circles
+  drawColoredCircles(); // Draw colored circles
+  drawClockHands();  // Draw clock hands
+  drawGlassCover();  // Draw glass cover
 }
 
 function drawMainCircles() {
   noStroke();
   fill(0, 68, 116);
-  ellipse(clockX, clockY, clockSize * 0.84);  //第0圈
+  ellipse(clockX, clockY, clockSize * 0.84);  // 0th circle
   fill(239, 248, 254);
-  ellipse(clockX, clockY, clockSize * 0.77);  // 第一圈
+  ellipse(clockX, clockY, clockSize * 0.77);  // 1st circle
   fill(0, 68, 116);
-  ellipse(clockX, clockY, clockSize * 0.7);  // 第二圈
+  ellipse(clockX, clockY, clockSize * 0.7);  // 2nd circle
   fill(239, 248, 254);
-  ellipse(clockX, clockY, clockSize * 0.63);  // 第三圈
+  ellipse(clockX, clockY, clockSize * 0.63);  // 3rd circle
   fill(0, 68, 116);
-  ellipse(clockX, clockY, clockSize * 0.56);  // 第四圈
+  ellipse(clockX, clockY, clockSize * 0.56);  // 4th circle
   fill(239, 248, 254);
-  ellipse(clockX, clockY, clockSize * 0.49);  // 第五圈
+  ellipse(clockX, clockY, clockSize * 0.49);  // 5th circle
   fill(0, 68, 116);
-  ellipse(clockX, clockY, clockSize * 0.42);  // 第六圈
+  ellipse(clockX, clockY, clockSize * 0.42);  // 6th circle
   fill(239, 248, 254);
-  ellipse(clockX, clockY, clockSize * 0.35);  // 第七圈
+  ellipse(clockX, clockY, clockSize * 0.35);  // 7th circle
   fill(0, 68, 116);
-  ellipse(clockX, clockY, clockSize * 0.28);  // 第八圈
+  ellipse(clockX, clockY, clockSize * 0.28);  // 8th circle
   fill(239, 248, 254);
-  ellipse(clockX, clockY, clockSize * 0.21);  // 第九圈
-  fill(247,65,151);
-  ellipse(clockX, clockY, clockSize * 0.2);   // 第十圈
-  fill(77,200,252);
-  ellipse(clockX, clockY, clockSize * 0.19);  // 第十一圈
-  fill(247,65,151);
-  ellipse(clockX, clockY, clockSize * 0.18);  // 第十二圈
-  fill(77,200,252);
-  ellipse(clockX, clockY, clockSize * 0.17);  // 第十三圈
+  ellipse(clockX, clockY, clockSize * 0.21);  // 9th circle
+  fill(247, 65, 151);
+  ellipse(clockX, clockY, clockSize * 0.2);   // 10th circle
+  fill(77, 200, 252);
+  ellipse(clockX, clockY, clockSize * 0.19);  // 11th circle
+  fill(247, 65, 151);
+  ellipse(clockX, clockY, clockSize * 0.18);  // 12th circle
+  fill(77, 200, 252);
+  ellipse(clockX, clockY, clockSize * 0.17);  // 13th circle
   fill(255);
-  ellipse(clockX, clockY, clockSize * 0.15);  // 第十四圈
-  fill(235,92,32);
-  ellipse(clockX, clockY, clockSize * 0.145); // 第十五圈
+  ellipse(clockX, clockY, clockSize * 0.15);  // 14th circle
+  fill(235, 92, 32);
+  ellipse(clockX, clockY, clockSize * 0.145); // 15th circle
   fill(255);
-  ellipse(clockX, clockY, clockSize * 0.14);  // 第十六圈
-  fill(235,92,32);
-  ellipse(clockX, clockY, clockSize * 0.135); // 第十七圈
+  ellipse(clockX, clockY, clockSize * 0.14);  // 16th circle
+  fill(235, 92, 32);
+  ellipse(clockX, clockY, clockSize * 0.135); // 17th circle
   fill(255);
-  ellipse(clockX, clockY, clockSize * 0.13);  // 第十八圈
-  fill(204,93,32);
-  ellipse(clockX, clockY, clockSize * 0.05);  // 第十九圈
+  ellipse(clockX, clockY, clockSize * 0.13);  // 18th circle
+  fill(204, 93, 32);
+  ellipse(clockX, clockY, clockSize * 0.05);  // 19th circle
 }
 
 function drawMovingBalls() {
@@ -198,24 +200,24 @@ function drawMovingBalls() {
   drawingContext.shadowOffsetY = 2;
   drawingContext.shadowBlur = 4;
   drawingContext.shadowColor = 'rgba(0, 0, 0, 0.5)';
-  fill(0);  // 小圆球颜色设置为黑色
+  fill(0);  // Set ball color to black
 
   balls.forEach(ball => {
     let x = clockX + cos(ball.angle) * ball.radius;
     let y = clockY + sin(ball.angle) * ball.radius;
-    ellipse(x, y, clockSize * 0.025);  // 小圆球直径减半
-    ball.angle += ball.speed;  // 更新圆球的角度，使其顺时针运动
+    ellipse(x, y, clockSize * 0.025);  // Ball diameter halved
+    ball.angle += ball.speed;  // Update ball angle for clockwise movement
   });
 }
 
 function drawRandomColoredCircles() {
   for (let i = 0; i < circles.length; i++) {
     let c = circles[i];
-    let radii = [c.d, c.d * 0.55, c.d * 0.5, c.d * 0.25, c.d * 0.15, c.d * 0.1, c.d * 0.05]; // 主圆及内部圆的大小
+    let radii = [c.d, c.d * 0.55, c.d * 0.5, c.d * 0.25, c.d * 0.15, c.d * 0.1, c.d * 0.05]; // Sizes of main circle and inner circles
 
-    push();  // 保存当前的绘制状态
-    translate(c.x, c.y);  // 将原点移到圆心位置
-    rotate(rotationAngle);  // 旋转坐标系
+    push();  // Save current drawing state
+    translate(c.x, c.y);  // Move origin to circle center
+    rotate(rotationAngle);  // Rotate coordinate system
 
     if (c.isSpecial) {
       drawSpecialCirclePattern(0, 0, radii, c.colors, c.styleType);
@@ -223,39 +225,39 @@ function drawRandomColoredCircles() {
       drawCirclePattern(0, 0, radii, c.colors, c.styleType);
     }
 
-    pop();  // 恢复之前的绘制状态
+    pop();  // Restore previous drawing state
   }
 
-  // 绘制橘色圆环
+  // Draw orange rings
   drawOrangeCircles(circles);
 
-  // 在橘色圆环上绘制图案
+  // Draw patterns on orange rings
   for (let i = 0; i < circles.length; i++) {
     let c = circles[i];
     drawPatternOnRing(c.x, c.y, c.d / 2 + 15);
   }
 
-  // 最后绘制粉色弧线，确保它们在最顶层
+  // Draw pink arcs last to ensure they are on top
   for (let i = 0; i < circles.length; i++) {
     let c = circles[i];
-    if (c.hasArc) {  // 检查是否需要绘制弧线
+    if (c.hasArc) {  // Check if arc is needed
       drawArcThroughCenter(c.x, c.y, c.d / 2, c.startAngle);
     }
   }
 
-  // 在两组特殊的同心圆中分别绘制红线
+  // Draw red lines in special circles
   drawRedLinesInSpecialCircles();
 }
 
 function drawCirclePattern(x, y, radii, colors, styleType) {
-  let numRings = radii.length; // 同心圆的数量
+  let numRings = radii.length; // Number of concentric circles
   for (let i = 0; i < numRings; i++) {
-    fill(colors[i % colors.length]); // 设置填充颜色
-    ellipse(x, y, radii[i], radii[i]); // 绘制圆形
-    if (i == 0) { // 只在最大的圆和第二大的圆之间绘制白色点
-      fillDotsOnCircle(x, y, radii[0] / 2, radii[1] / 2); // 填充圆点到整个圆
+    fill(colors[i % colors.length]); // Set fill color
+    ellipse(x, y, radii[i], radii[i]); // Draw circle
+    if (i == 0) { // Only draw white dots between largest and second largest circles
+      fillDotsOnCircle(x, y, radii[0] / 2, radii[1] / 2); // Fill dots in entire circle
     }
-    if (i == 2 && i + 1 < numRings) { // 在第三大和第四大圆之间根据风格绘制
+    if (i == 2 && i + 1 < numRings) { // Draw based on style between third and fourth largest circles
       if (styleType === 'goldZigzag') {
         drawGoldZShape(x, y, radii[2] / 2, radii[3] / 2);
       } else if (styleType === 'multiLayeredRings') {
@@ -269,10 +271,10 @@ function drawCirclePattern(x, y, radii, colors, styleType) {
 }
 
 function drawSpecialCirclePattern(x, y, radii, colors, styleType) {
-  fill(specialCircleColor); // 设置最大的圆为特殊颜色
-  ellipse(x, y, radii[0], radii[0]); // 绘制最大的圆
+  fill(specialCircleColor); // Set largest circle to special color
+  ellipse(x, y, radii[0], radii[0]); // Draw largest circle
 
-  // 绘制其他的圆，跳过白色小圆点的绘制
+  // Draw other circles, skip white dot drawing
   for (let i = 1; i < radii.length; i++) {
     fill(colors[i % colors.length]);
     ellipse(x, y, radii[i], radii[i]);
@@ -295,115 +297,115 @@ function drawRedLinesInSpecialCircles() {
 
 function drawRedLine(cx, cy, outerRadius, innerRadius) {
   push();
-  stroke(255, 0, 0); // 红色
-  strokeWeight(redLineStrokeWeight); // 设置线条宽度
-  noFill(); // 不填充
+  stroke(255, 0, 0); // Red color
+  strokeWeight(redLineStrokeWeight); // Set line width
+  noFill(); // No fill
 
-  let numSpikes = redLineSpikes; // 尖角的数量
-  let angleStep = TWO_PI / numSpikes; // 每个尖角之间的角度
+  let numSpikes = redLineSpikes; // Number of spikes
+  let angleStep = TWO_PI / numSpikes; // Angle between spikes
 
   beginShape();
   for (let i = 0; i < numSpikes; i++) {
-    // 计算外圈点位置（第一大圆和第二大圆的区间）
+    // Calculate outer point positions (between first and second largest circles)
     let angle = i * angleStep;
     let outerX = cx + cos(angle) * outerRadius;
     let outerY = cy + sin(angle) * outerRadius;
-    vertex(outerX, outerY); // 添加外圈点
+    vertex(outerX, outerY); // Add outer points
 
-    // 计算内圈点位置（向内缩进以形成尖角）
+    // Calculate inner point positions (retract inward to form spikes)
     let innerAngle = angle + angleStep / 2;
     let innerRadiusAdjust = innerRadius + (outerRadius - innerRadius) * 0.3;
     let innerX = cx + cos(innerAngle) * innerRadiusAdjust;
     let innerY = cy + sin(innerAngle) * innerRadiusAdjust;
-    vertex(innerX, innerY); // 添加内圈点
+    vertex(innerX, innerY); // Add inner points
   }
   endShape(CLOSE);
 
-  pop(); // 恢复之前保存的绘图设置
+  pop(); // Restore previous drawing state
 }
 
 function drawGoldZShape(cx, cy, thirdRadius, fourthRadius) {
   push();
-  stroke(212, 175, 55); // 设置画笔颜色为金色
-  strokeWeight(goldLineStrokeWeight); // 设置线条宽度
-  noFill(); // 不填充
+  stroke(212, 175, 55); // Set stroke color to gold
+  strokeWeight(goldLineStrokeWeight); // Set line width
+  noFill(); // No fill
 
-  let numSpikes = goldLineSpikes; // 尖角的数量
-  let angleStep = TWO_PI / numSpikes; // 每个尖角之间的角度
+  let numSpikes = goldLineSpikes; // Number of spikes
+  let angleStep = TWO_PI / numSpikes; // Angle between spikes
 
   beginShape();
   for (let i = 0; i < numSpikes; i++) {
-    // 计算外圈点位置（第三圆的外圈）
+    // Calculate outer point positions (outer ring of third circle)
     let angle = i * angleStep;
     let outerX = cx + cos(angle) * thirdRadius;
     let outerY = cy + sin(angle) * thirdRadius;
-    vertex(outerX, outerY); // 添加外圈点
+    vertex(outerX, outerY); // Add outer points
 
-    // 计算内圈点位置（第四圆的内圈），但稍微向内缩进以形成尖角
+    // Calculate inner point positions (inner ring of fourth circle), slightly retracted to form spikes
     let innerAngle = angle + angleStep / 2;
-    let innerRadiusAdjust = fourthRadius + (thirdRadius - fourthRadius) * 0.3; // 调整内圈半径使尖角不会太尖
+    let innerRadiusAdjust = fourthRadius + (thirdRadius - fourthRadius) * 0.3;
     let innerX = cx + cos(innerAngle) * innerRadiusAdjust;
     let innerY = cy + sin(innerAngle) * innerRadiusAdjust;
-    vertex(innerX, innerY); // 添加内圈点
+    vertex(innerX, innerY); // Add inner points
   }
   endShape(CLOSE);
 
-  pop(); // 恢复之前保存的绘图设置
+  pop(); // Restore previous drawing state
 }
 
 function drawMultiLayeredRings(cx, cy, thirdRadius, fourthRadius) {
   push();
   let colors = [
-    color(255, 0, 121),  // 粉色
-    color(0, 179, 255)    // 蓝色
+    color(255, 0, 121),  // Pink
+    color(0, 179, 255)   // Blue
   ];
   strokeWeight(3);
   noFill();
-  let numRings = 5; // 圆环数量
-  let radiusStep = (thirdRadius - fourthRadius) / numRings; // 半径步长
+  let numRings = 5; // Number of rings
+  let radiusStep = (thirdRadius - fourthRadius) / numRings; // Radius step
 
   for (let j = 0; j < numRings; j++) {
-    stroke(colors[j % colors.length]); // 设置画笔颜色
+    stroke(colors[j % colors.length]); // Set stroke color
     ellipse(cx, cy, thirdRadius * 2 - j * radiusStep, thirdRadius * 2 - j * radiusStep);
   }
 
-  pop(); // 恢复之前保存的绘图设置
+  pop(); // Restore previous drawing state
 }
 
 function drawGreenLayeredRings(cx, cy, fourthRadius, fifthRadius) {
   push();
   let colors = [
-    color(255, 255, 255),  // 白色
-    color(68, 106, 55) // 浅绿
+    color(255, 255, 255),  // White
+    color(68, 106, 55)     // Light green
   ];
   strokeWeight(3);
   noFill();
-  let numRings = 4; // 圆环数量
-  let radiusStep = (fourthRadius - fifthRadius) / numRings; // 半径步长
+  let numRings = 4; // Number of rings
+  let radiusStep = (fourthRadius - fifthRadius) / numRings; // Radius step
 
   for (let j = 0; j < numRings; j++) {
-    stroke(colors[j % colors.length]); // 设置画笔颜色
+    stroke(colors[j % colors.length]); // Set stroke color
     ellipse(cx, cy, fourthRadius * 2 - j * radiusStep, fourthRadius * 2 - j * radiusStep);
   }
 
-  pop(); // 恢复之前保存的绘图设置
+  pop(); // Restore previous drawing state
 }
 
 function fillDotsOnCircle(cx, cy, outerRadius, innerRadius) {
-  fill(255); // 设置填充颜色为白色
-  let numCircles = 6; // 总共绘制6圈
-  let dotSize = 3.5; // 圆点的直径，可以调整
-  let radiusStep = (outerRadius - innerRadius) / numCircles; // 计算圈与圈之间的距离
+  fill(255); // Set fill color to white
+  let numCircles = 6; // Total of 6 rings
+  let dotSize = 3.5; // Dot diameter, adjustable
+  let radiusStep = (outerRadius - innerRadius) / numCircles; // Distance between rings
 
   for (let j = 0; j < numCircles; j++) {
-    let currentRadius = innerRadius + j * radiusStep + radiusStep / 2; // 当前半径
-    let numDots = Math.floor(TWO_PI * currentRadius / (dotSize * 3)); // 计算当前半径上可以放置的圆点数
-    let angleStep = TWO_PI / numDots; // 每个点之间的角度
+    let currentRadius = innerRadius + j * radiusStep + radiusStep / 2; // Current radius
+    let numDots = Math.floor(TWO_PI * currentRadius / (dotSize * 3)); // Calculate number of dots per radius
+    let angleStep = TWO_PI / numDots; // Angle between dots
     for (let i = 0; i < numDots; i++) {
       let angle = i * angleStep;
       let x = cx + cos(angle) * currentRadius;
       let y = cy + sin(angle) * currentRadius;
-      ellipse(x, y, dotSize, dotSize); // 绘制圆点
+      ellipse(x, y, dotSize, dotSize); // Draw dot
     }
   }
 }
@@ -411,32 +413,32 @@ function fillDotsOnCircle(cx, cy, outerRadius, innerRadius) {
 function drawOrangeCircles(circles) {
   for (let i = 0; i < circles.length; i++) {
     let c = circles[i];
-    let arcRadius = c.d / 2 + 15; // 弧的半径，可以根据需要调整
-    stroke(255, 165, 0); // 橘色
+    let arcRadius = c.d / 2 + 15; // Radius for the arc, adjustable
+    stroke(255, 165, 0); // Orange
     strokeWeight(2.5);
     noFill();
-    ellipse(c.x, c.y, arcRadius * 2, arcRadius * 2); // 绘制完整的圆环
+    ellipse(c.x, c.y, arcRadius * 2, arcRadius * 2); // Draw full ring
   }
 }
 
 function drawPatternOnRing(cx, cy, radius) {
-  let numPatterns = 8; // 图案的数量，减少密集度
-  let angleStep = TWO_PI / numPatterns; // 每个图案之间的角度
+  let numPatterns = 8; // Number of patterns, reduce density
+  let angleStep = TWO_PI / numPatterns; // Angle between patterns
 
   for (let i = 0; i < numPatterns; i++) {
     let angle = i * angleStep;
     let x = cx + cos(angle) * radius;
     let y = cy + sin(angle) * radius;
-    // 绘制红色圆
+    // Draw red circle
     fill(200, 0, 0);
     ellipse(x, y, 10, 10);
-    // 绘制黄色圆
+    // Draw yellow circle
     let angleOffset = angleStep / 3;
     let xOffset = cx + cos(angle + angleOffset) * radius;
     let yOffset = cy + sin(angle + angleOffset) * radius;
     fill(255, 255, 0);
     ellipse(xOffset, yOffset, 6, 6);
-    // 绘制黑色圆环
+    // Draw black ring
     let angleOffset2 = angleStep / 3 * 2;
     let xOffset2 = cx + cos(angle + angleOffset2) * radius;
     let yOffset2 = cy + sin(angle + angleOffset2) * radius;
@@ -449,33 +451,32 @@ function drawPatternOnRing(cx, cy, radius) {
 
 function drawArcThroughCenter(x, y, radius, startAngle) {
   push();
-  let baseColor = color(255, 20, 147); // 原始粉色
-  let shadowColor = lerpColor(baseColor, color(0), 0.25); // 生成深粉色阴影
+  let baseColor = color(255, 20, 147); // Original pink
+  let shadowColor = lerpColor(baseColor, color(0), 0.25); // Generate dark pink shadow
 
-  strokeWeight(6); // 设置线条宽度
-  noFill(); // 不填充
+  strokeWeight(6); // Set line width
+  noFill(); // No fill
 
-  // 计算弧线起止点基于 startAngle
+  // Calculate arc start and end points based on startAngle
   let endX = x + cos(startAngle - PI / 4) * radius * 1.5;
   let endY = y + sin(startAngle - PI / 4) * radius * 1.5;
 
-  // 绘制阴影
-  stroke(shadowColor); // 使用深粉色作为阴影色
+  // Draw shadow
+  stroke(shadowColor); // Use dark pink for shadow
   drawCurvedLine(x, y + 3, endX, endY + 3);
 
-  // 绘制主弧线
-  stroke(baseColor); // 使用原始粉色
+  // Draw main arc  stroke(baseColor); // Use original pink
   drawCurvedLine(x, y, endX, endY);
 
-  pop(); // 恢复之前保存的绘图设置
+  pop(); // Restore previous drawing state
 }
 
 function drawCurvedLine(x1, y1, x2, y2) {
-  // 计算控制点，使得曲线是弧形
+  // Calculate control points to make the curve arc-shaped
   let cx1 = (x1 + x2) / 2 + (y2 - y1) * 0.5;
   let cy1 = (y1 + y2) / 2 - (x2 - x1) * 0.5;
 
-  // 使用贝塞尔曲线绘制弧线
+  // Draw the arc using a bezier curve
   noFill();
   beginShape();
   vertex(x1, y1);
@@ -484,7 +485,7 @@ function drawCurvedLine(x1, y1, x2, y2) {
 }
 
 function generateColors() {
-  // 随机生成颜色数组，为每个圆指定颜色
+  // Randomly generate color arrays for each circle
   return [
     [random(255), random(255), random(255)],
     [random(255), random(255, 255)],
@@ -498,18 +499,18 @@ function windowResized() {
   clockX = windowWidth / 2;
   clockY = windowHeight / 2;
 
-  // 更新小圆球的半径以适应新的尺寸
+  // Update ball radius to fit new size
   balls.forEach(ball => {
-    ball.radius = clockSize * (ball.speed * 63 - 0.315);  // 根据速度更新半径
+    ball.radius = clockSize * (ball.speed * 63 - 0.315);  // Update radius based on speed
   });
 
   circles = [];
-  setup(); // 重新生成圆圈
+  setup(); // Re-generate circles
   drawClock();
 }
 
 function randomizeColors() {
-  // 重新生成所有圆的颜色
+  // Re-generate colors for all circles
   for (let i = 0; i < 24; i++) {
     colors[i] = [random(255), random(255, random(255))];
   }
@@ -523,7 +524,7 @@ function mousePressed() {
   drawClock();
 }
 
-// 新增代码：绘制时钟指针
+// Draw clock hands
 function drawClockHands() {
   let now = new Date();
 
@@ -531,9 +532,9 @@ function drawClockHands() {
   let minutes = now.getMinutes();
   let hours = now.getHours() % 12;
 
-  drawHand(clockX, clockY, clockSize * 0.63, seconds / 60 * TWO_PI - HALF_PI, color(255), 4); // 秒针
-  drawHandWithBall(clockX, clockY, clockSize * 0.42, minutes / 60 * TWO_PI - HALF_PI, color(0, 255, 255), 8, 16); // 分针
-  drawHandWithBall(clockX, clockY, clockSize * 0.21, hours / 12 * TWO_PI - HALF_PI, color(0, 0, 255), 12, 24); // 时针
+  drawHand(clockX, clockY, clockSize * 0.63, seconds / 60 * TWO_PI - HALF_PI, color(255), 4); // Second hand
+  drawHandWithBall(clockX, clockY, clockSize * 0.42, minutes / 60 * TWO_PI - HALF_PI, color(0, 255, 255), 8, 16); // Minute hand
+  drawHandWithBall(clockX, clockY, clockSize * 0.21, hours / 12 * TWO_PI - HALF_PI, color(0, 0, 255), 12, 24); // Hour hand
 }
 
 function drawHand(cx, cy, length, angle, col, weight) {
@@ -547,55 +548,57 @@ function drawHandWithBall(cx, cy, length, angle, col, weight, ballSize) {
   strokeWeight(weight);
   line(cx, cy, cx + cos(angle) * length, cy + sin(angle) * length);
 
-  // 在指针尾部绘制小圆球
-  fill(255, 160, 0);// 设置填充颜色为金色
-  stroke(col);  // 保持原本的描边颜色
-  strokeWeight(5);  // 设置描边宽度，可以根据需要调整
-  ellipse(cx + cos(angle) * length, cy + sin(angle) * length, ballSize, ballSize); // 调整球的位置和大小
+  // Draw small circle at the end of the hand
+  fill(255, 160, 0); // Set fill color to gold
+  stroke(col);  // Keep original stroke color
+  strokeWeight(5);  // Set stroke width, adjustable
+  ellipse(cx + cos(angle) * length, cy + sin(angle) * length, ballSize, ballSize); // Adjust ball position and size
 }
 
-
-// 新增代码：绘制玻璃盖子
+// Draw glass cover
 function drawGlassCover() {
   push();
-  fill(255, 255, 255, 10); // 半透明白色，透明度为50
-  stroke(200); // 灰色边框
-  strokeWeight(2); // 边框宽度
-  ellipse(clockX, clockY, clockSize * 1.3, clockSize * 1.3); // 绘制玻璃盖子
+  fill(255, 255, 255, 10); // Semi-transparent white, 10% opacity
+  stroke(200); // Gray border
+  strokeWeight(2); // Border width
+  ellipse(clockX, clockY, clockSize * 1.3, clockSize * 1.3); // Draw glass cover
 
-  // 新增代码：绘制金色圆
-  noFill();  // 不填充
-  stroke(255, 160, 0); // 设置描边颜色为金色
-  strokeWeight(2); // 线条宽度
-  ellipse(clockX, clockY, clockSize * 1.27, clockSize * 1.27); // 绘制离玻璃边框有一点距离的金色圆
+  // Draw gold circle
+  noFill();  // No fill
+  stroke(255, 160, 0); // Set stroke color to gold
+  strokeWeight(3); // Line width
+  ellipse(clockX, clockY, clockSize * 1.27, clockSize * 1.27); // Draw gold circle just inside the glass cover
 
   pop();
 }
-// 新增代码：绘制橙色渐变小圆
+
+// Draw orange gradient circles
 function drawGradientCircles() {
   gradientCircles.forEach(circle => {
     let x = clockX + cos(circle.angle) * circle.radius;
     let y = clockY + sin(circle.angle) * circle.radius;
     fill(circle.color);
     noStroke();
-    ellipse(x, y, 10, 10); // 小圆的直径
-    circle.angle += gradientSpeed; // 更新角度，使小圆顺时针运动
+    ellipse(x, y, 10, 10); // Small circle diameter
+    circle.angle += gradientSpeed; // Update angle for clockwise movement
   });
 }
 
-// 新增代码：绘制彩色小圆
+// Draw colored circles
 function drawColoredCircles() {
-  let baseAngle = rotationAngle; // 使彩色小圆整体旋转
-  let circleDiameter = 20; // 小圆的直径
+  let baseAngle = rotationAngle; // Rotate colored circles as a group
+  let circleDiameter = 20; // Diameter of small circles
 
   coloredCircles.forEach((circle, index) => {
-    let angle = baseAngle + index * (circleDiameter / coloredRadius); // 每个小圆的位置
+    let angle = baseAngle + index * (circleDiameter / coloredRadius); // Position of each small circle
     let x = clockX + cos(angle) * circle.radius;
     let y = clockY + sin(angle) * circle.radius;
     fill(circle.color);
     noStroke();
-    ellipse(x, y, circleDiameter, circleDiameter); // 绘制小圆
+    ellipse(x, y, circleDiameter, circleDiameter); // Draw small circle
   });
 
-  baseAngle += coloredSpeed; // 更新基础角度，使彩色小圆整体顺时针旋转
+  baseAngle += coloredSpeed; // Update base angle for clockwise rotation of colored circles
 }
+
+ 
