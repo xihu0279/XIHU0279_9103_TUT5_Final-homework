@@ -2,6 +2,7 @@ let clockX, clockY, clockSize;  // 定义时钟中心坐标和大小
 let colors = [];                // 主时钟颜色数组
 let altColors = [];             // 交替圆环颜色数组
 let balls = [];                 // 存储圆球的数组，包括角度和速度
+
 let circles = [];
 let circleDiameter = 130; // 主圆的直径，可以调整
 let spacing = 25; // 圆圈之间的间距，可以调整
@@ -18,8 +19,13 @@ let goldLineSpikes = 16; // 金线的角的个数，默认16
 let rotationAngle = 0;  // 用于控制旋转角度
 let rotationSpeed = 0.05;  // 控制旋转速度
 
+// 新增代码：初始化变量
 let gradientCircles = [];
 let gradientSpeed = 0.02;
+
+let coloredCircles = [];
+let coloredRadius = []; // 初始化彩色小圆的半径，可以修改以调整位置
+let coloredSpeed = 0.01;  // 定义彩色小圆的旋转速度
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -92,7 +98,7 @@ function setup() {
     color(255, 250, 0)
   ];
 
-  let gradientRadius = (clockSize * 0.95 + clockSize * circleGroupDistanceFactor) / 4;
+  let gradientRadius = (clockSize * 0.16 + clockSize * circleGroupDistanceFactor) / 2; // 调整半径，使小圆往外移动一点
   let gradientAngleStep = TWO_PI / gradientColors.length;
 
   for (let i = 0; i < gradientColors.length; i++) {
@@ -100,6 +106,27 @@ function setup() {
       color: gradientColors[i],
       angle: i * gradientAngleStep,
       radius: gradientRadius,
+    });
+  }
+// 计算彩色小圆的半径，使其在最大深蓝色圆的外围一点点
+coloredRadius = clockSize * 0.84 / 2 + 25;  // 比最大的深蓝色圆外半径大15
+  // 新增代码：初始化7个彩色小圆
+  let coloredCircleColors = [
+    color(255, 0, 0), // 红色
+    color(255, 165, 0), // 橙色
+    color(255, 255, 0), // 黄色
+    color(0, 255, 0), // 绿色
+    color(0, 255, 255), // 青色
+    color(0, 0, 255), // 蓝色
+    color(128, 0, 128) // 紫色
+  ];
+  let coloredAngleStep = TWO_PI / coloredCircleColors.length;
+
+  for (let i = 0; i < coloredCircleColors.length; i++) {
+    coloredCircles.push({
+      color: coloredCircleColors[i],
+      angle: i * coloredAngleStep,
+      radius: coloredRadius,
     });
   }
 
@@ -117,6 +144,7 @@ function drawClock() {
   drawMovingBalls();
   drawRandomColoredCircles();
   drawGradientCircles(); // 新增：绘制渐变小圆
+  drawColoredCircles(); // 新增：绘制彩色小圆
   drawClockHands();  // 新增：绘制时钟指针
   drawGlassCover();  // 新增：绘制玻璃盖子
 }
@@ -520,10 +548,12 @@ function drawHandWithBall(cx, cy, length, angle, col, weight, ballSize) {
   line(cx, cy, cx + cos(angle) * length, cy + sin(angle) * length);
 
   // 在指针尾部绘制小圆球
-  fill(col);
-  noStroke();
+  fill(255, 160, 0);// 设置填充颜色为金色
+  stroke(col);  // 保持原本的描边颜色
+  strokeWeight(5);  // 设置描边宽度，可以根据需要调整
   ellipse(cx + cos(angle) * length, cy + sin(angle) * length, ballSize, ballSize); // 调整球的位置和大小
 }
+
 
 // 新增代码：绘制玻璃盖子
 function drawGlassCover() {
@@ -533,15 +563,14 @@ function drawGlassCover() {
   strokeWeight(2); // 边框宽度
   ellipse(clockX, clockY, clockSize * 1.3, clockSize * 1.3); // 绘制玻璃盖子
 
-  // 新增代码：绘制金色圆
-  stroke(255, 165, 0); // 设置画笔颜色为金色
-  strokeWeight(1); // 线条宽度
+  // 新增代码：绘制黄色圆
+  stroke(specialCircleColor); // 设置画笔颜色为黄色
+  strokeWeight(3); // 线条宽度
   noFill(); // 不填充
-  ellipse(clockX, clockY, clockSize * 1.25, clockSize * 1.25); // 绘制离玻璃边框有一点距离的金色圆
+  ellipse(clockX, clockY, clockSize * 1.27, clockSize * 1.27); // 绘制离玻璃边框有一点距离的黄色圆
 
   pop();
 }
-
 
 // 新增代码：绘制橙色渐变小圆
 function drawGradientCircles() {
@@ -553,6 +582,21 @@ function drawGradientCircles() {
     ellipse(x, y, 10, 10); // 小圆的直径
     circle.angle += gradientSpeed; // 更新角度，使小圆顺时针运动
   });
- 
-  
+}
+
+// 新增代码：绘制彩色小圆
+function drawColoredCircles() {
+  let baseAngle = rotationAngle; // 使彩色小圆整体旋转
+  let circleDiameter = 20; // 小圆的直径
+
+  coloredCircles.forEach((circle, index) => {
+    let angle = baseAngle + index * (circleDiameter / coloredRadius); // 每个小圆的位置
+    let x = clockX + cos(angle) * circle.radius;
+    let y = clockY + sin(angle) * circle.radius;
+    fill(circle.color);
+    noStroke();
+    ellipse(x, y, circleDiameter, circleDiameter); // 绘制小圆
+  });
+
+  baseAngle += coloredSpeed; // 更新基础角度，使彩色小圆整体顺时针旋转
 }
